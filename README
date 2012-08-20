@@ -6,3 +6,7 @@ Dependencies:
 	libsfml-dev
 
 To build, you may need to modify the -L path to OpenCL in opencl-nbody.pro and then re-run qmake.
+
+To run:
+    Click+drag to rotate
+    Spacebar to explode
