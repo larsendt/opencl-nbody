@@ -7,6 +7,9 @@
 #include "OCLParticleEngine.h"
 #include "Shader.h"
 
+#define GLM_SWIZZLE
+#include "glm/glm.hpp"
+
 class GLEngine
 {
 	public:
@@ -20,7 +23,9 @@ class GLEngine
 		int begin();
 		
 	private:
-		sf::Window* m_window;
+        glm::vec3 windowCoords(int x, int y); 
+
+        sf::Window* m_window;
 		sf::Clock* m_clock;
 		OCLParticleEngine* m_particles;
 		Shader* m_particleShader;

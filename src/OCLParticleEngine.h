@@ -20,13 +20,16 @@ class OCLParticleEngine
 		~OCLParticleEngine();
 		void draw();
 		void update(float multiplier);
-		
+		void setExternalForce(float x, float y, float z, float strength);
+
 	private:
 		GLuint m_vbo;
 		GLuint m_ibo;
 		int m_numVertices;
 		float m_time;
-		
+        float m_externalForcePos[4];
+        float m_externalForceStrength;
+
 		OCLKernel* m_kernel;
 		Particle* m_particleArray;
 		Particle* m_velocityArray;

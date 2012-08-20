@@ -84,7 +84,10 @@ int GLEngine::begin()
 					case sf::Key::Escape:
 						m_window->Close();
 						return 0;
-					default:
+                    case sf::Key::Space:
+                        m_particles->setExternalForce(0.1, 0, 0, 0.0001);
+                        break;
+                    default:
 						break;
 				}
 			}
@@ -168,3 +171,23 @@ void GLEngine::resize(int width, int height)
 	glLoadIdentity();
 }
 
+glm::vec3 GLEngine::windowCoords(int x, int y)
+{
+    GLint viewport[4];
+    GLdouble modelview[16];
+    GLdouble projection[16];
+    GLfloat winX, winY, winZ;
+    GLdouble posX, posY, posZ;
+ 
+    glGetDoublev( GL_MODELVIEW_MATRIX, modelview );
+    glGetDoublev( GL_PROJECTION_MATRIX, projection );
+    glGetIntegerv( GL_VIEWPORT, viewport );
+ 
+    winX = (float)x;
+    winY = (float)viewport[3] - (float)y;
+    glReadPixels( x, int(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ );
+ 
+    gluUnProject( winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
+ 
+    return glm::vec3(posX, posY, posZ);
+}

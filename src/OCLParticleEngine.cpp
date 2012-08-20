@@ -10,6 +10,12 @@ OCLParticleEngine::OCLParticleEngine(int nparticles)
 {
 	srand(time(NULL));
 	GLushort* indexArray;
+
+    m_externalForcePos[0] = 0;
+    m_externalForcePos[1] = 0;
+    m_externalForcePos[2] = 0;
+    m_externalForcePos[3] = 0;
+    m_externalForceStrength = 0;
 	
 	m_numVertices = nparticles;
 	m_particleArray = new Particle[m_numVertices];
@@ -77,7 +83,7 @@ void OCLParticleEngine::draw()
 
 void OCLParticleEngine::update(float multiplier)
 {
-	OCLArgument args[3];
+	OCLArgument args[5];
 	OCLArgument buffers[2];
 	
 	OCLArgument a;
@@ -101,15 +107,35 @@ void OCLParticleEngine::update(float multiplier)
 	a.byte_size = sizeof(m_numVertices);
 	a.is_buffer = false;
 	args[2] = a;
-	
-	m_kernel->run(3, args, 2, buffers, m_numVertices, 1);
-	
+
+    a.data = m_externalForcePos;
+    a.byte_size = sizeof(m_externalForcePos);
+    a.is_buffer = false;
+    args[3] = a;
+
+    a.data = &m_externalForceStrength;
+    a.byte_size = sizeof(m_externalForceStrength);
+    a.is_buffer = false;
+    args[4] = a;
+
+	m_kernel->run(5, args, 2, buffers, m_numVertices, 1);
+
+    m_externalForceStrength = 0;
+
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
 	glBufferSubData(GL_ARRAY_BUFFER, (GLintptr)0, m_numVertices*sizeof(Particle), m_particleArray);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);	
 	
 }
 
+void OCLParticleEngine::setExternalForce(float x, float y, float z, float strength)
+{
+    m_externalForcePos[0] = x; 
+    m_externalForcePos[1] = y; 
+    m_externalForcePos[2] = z; 
+    m_externalForcePos[3] = 0; 
 
+    m_externalForceStrength = strength;
+}
 
 
