@@ -24,7 +24,7 @@ GLEngine::~GLEngine()
 
 void GLEngine::initGL(int argc, char** argv)
 {
-	m_window = new sf::Window(sf::VideoMode(800, 800), "GLEngine");
+	m_window = new sf::Window(sf::VideoMode(800, 600), "GLEngine");
 	m_clock = new sf::Clock();
 	m_screenWidth = m_window->GetWidth();
 	m_screenHeight = m_window->GetHeight();
@@ -32,7 +32,7 @@ void GLEngine::initGL(int argc, char** argv)
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 	glEnable(GL_TEXTURE_2D);
 	
-	m_particles = new OCLParticleEngine(2048);
+	m_particles = new OCLParticleEngine(128);
 	m_rotation = 0;
 	m_mouseRotX = 0;
 	m_mouseRotY = 0;
@@ -41,7 +41,7 @@ void GLEngine::initGL(int argc, char** argv)
 	m_scale = 1.0;
 
 	m_particleShader = new Shader("shaders/nbody.vert", "shaders/nbody.frag", "shaders/nbody.geom");
-	m_texture = Texture::loadTexture("resources/star.bmp");
+	m_texture = Texture::loadTexture("resources/star.bmp", Texture::LINEAR);
 	
 	m_updateRate = 1.0/60.0;
 	resize(m_screenWidth, m_screenHeight);

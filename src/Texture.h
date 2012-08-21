@@ -8,8 +8,13 @@
 class Texture
 {
     public:
-        static GLuint loadTexture(std::string img_path);
-        static GLuint loadFromMemory(int width, int height, unsigned char* data);
+        enum ScalingMode {
+            NEAREST,
+            LINEAR
+        };
+        
+        static GLuint loadTexture(std::string img_path, ScalingMode mode);
+        static GLuint loadFromMemory(int width, int height, unsigned char* data, ScalingMode mode);
         static void deleteTexture(GLuint texture_handle);
         
     private:

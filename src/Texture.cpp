@@ -10,7 +10,7 @@ Texture::Texture()
 
 static std::map<std::string, GLuint> m_texMap;
 
-GLuint Texture::loadTexture(std::string img_path)
+GLuint Texture::loadTexture(std::string img_path, ScalingMode mode)
 {
 	if(m_texMap.find(img_path) != m_texMap.end())
 	{
@@ -24,6 +24,12 @@ GLuint Texture::loadTexture(std::string img_path)
         printf("Failed to load texture: %s Using default color #ff00ff\n", img_path.c_str());
 		img->Create(50, 50, sf::Color::Magenta);	
     }
+
+    GLint glmode;
+    if(mode == LINEAR)
+        glmode = GL_LINEAR;
+    else if(mode == NEAREST)
+        glmode = GL_NEAREST;
     
     glEnable(GL_TEXTURE_2D);
     GLuint texture;
@@ -31,8 +37,8 @@ GLuint Texture::loadTexture(std::string img_path)
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glmode);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glmode);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img->GetWidth(), img->GetHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, img->GetPixelsPtr());
     glBindTexture(GL_TEXTURE_2D, 0);
     
@@ -41,16 +47,22 @@ GLuint Texture::loadTexture(std::string img_path)
     return texture;
 }
 
-GLuint Texture::loadFromMemory(int width, int height, unsigned char* data)
+GLuint Texture::loadFromMemory(int width, int height, unsigned char* data, ScalingMode mode)
 {
+    GLint glmode;
+    if(mode == LINEAR)
+        glmode = GL_LINEAR;
+    else if(mode == NEAREST)
+        glmode = GL_NEAREST;
+
 	glEnable(GL_TEXTURE_2D);
     GLuint texture;
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glmode);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glmode);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
     glBindTexture(GL_TEXTURE_2D, 0);
     return texture;

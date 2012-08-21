@@ -15,7 +15,8 @@ kernel void nbody_move(global float* positions,
 		int vi = i*3;
 		float4 other_vertex = (float4)(positions[vi], positions[vi+1], positions[vi+2], 0);
 		float4 direction = other_vertex - this_vertex;
-		final_grav += normalize(direction) / (4000.0 * vertex_count);
+        float dist = length(direction);
+		final_grav += normalize(direction) / ((pow(dist, 2) + 0.01) * 5000000);//(4000.0 * vertex_count);
 	}
 
     float4 external_force_direction = this_vertex - external_force_pos;
