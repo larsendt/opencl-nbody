@@ -32,7 +32,11 @@ void GLEngine::initGL(int argc, char** argv)
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 	glEnable(GL_TEXTURE_2D);
 	
-	m_particles = new OCLParticleEngine(128);
+    int numparticles = 1024;
+    if(argc > 1 && atoi(argv[1]) > 0)
+        numparticles = atoi(argv[1]);
+
+	m_particles = new OCLParticleEngine(numparticles);
 	m_rotation = 0;
 	m_mouseRotX = 0;
 	m_mouseRotY = 0;
@@ -85,7 +89,7 @@ int GLEngine::begin()
 						m_window->Close();
 						return 0;
                     case sf::Key::Space:
-                        m_particles->setExternalForce(0.1, 0, 0, 0.0001);
+                        m_particles->setExternalForce(0.05, 0, 0, 0.0001);
                         break;
                     default:
 						break;
@@ -125,8 +129,28 @@ void GLEngine::drawScene()
 	
 	m_particleShader->bind();
 	m_particleShader->setUniform1i("star", 0);
-	
-	glBlendFunc(GL_ONE, GL_ONE);
+
+    // pass the velocity data into the shader for coloring
+    Particle *velocities = m_particles->velocityData();
+    float *masses = m_particles->massData();
+    GLuint particle_count = m_particles->count();
+    GLuint vertex_array;
+    glGenVertexArrays(1, &vertex_array);
+    glBindVertexArray(vertex_array);
+
+    GLuint buffer;
+    glGenBuffers(1, &buffer);
+   
+    GLuint velocity_location = glGetAttribLocation(m_particleShader->program(), "velocity");
+    glEnableVertexAttribArray(velocity_location);
+    
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferData(GL_ARRAY_BUFFER, particle_count*sizeof(Particle), velocities, GL_DYNAMIC_DRAW);
+    glVertexAttribPointer(velocity_location, 3, GL_FLOAT, 0, 0, 0);
+        
+    // put masses here 
+
+    glBlendFunc(GL_ONE, GL_ONE);
 	glEnable(GL_BLEND);
 
 	m_particles->draw();

@@ -20,6 +20,7 @@ OCLParticleEngine::OCLParticleEngine(int nparticles)
 	m_numVertices = nparticles;
 	m_particleArray = new Particle[m_numVertices];
 	m_velocityArray = new Particle[m_numVertices];
+    m_massArray = new float[m_numVertices];
 	indexArray = new GLushort[m_numVertices];
 
 	for(int i = 0; i < m_numVertices; i++)
@@ -36,11 +37,16 @@ OCLParticleEngine::OCLParticleEngine(int nparticles)
 		m_particleArray[i] = p;
 		indexArray[i] = i;
 
-		p.x = p.x/400;
-		p.y = -p.y/400; 
+		p.x = 0; //p.x/400;
+		p.y = 0; //-p.y/400; 
 		p.z = 0;
 		
 		m_velocityArray[i] = p;
+
+        float base_m = 1000.0;
+        float dev = 10.0;
+        int randmass = (base_m * dev * 2 * (float)rand()/RAND_MAX) - (base_m/2);
+        m_massArray[i] = base_m + randmass;
 	}
 	
 	glGenBuffers(1, &m_vbo); 
@@ -83,8 +89,8 @@ void OCLParticleEngine::draw()
 
 void OCLParticleEngine::update(float multiplier)
 {
-	OCLArgument args[5];
-	OCLArgument buffers[2];
+	OCLArgument args[6];
+	OCLArgument buffers[3];
 	
 	OCLArgument a;
 	a.data = m_particleArray;
@@ -103,22 +109,30 @@ void OCLParticleEngine::update(float multiplier)
 	args[1] = a;
 	buffers[1] = a;
 
+    a.data = m_massArray;
+    a.byte_size = m_numVertices * sizeof(float);
+    a.is_buffer = true;
+    a.buffer_index = 2;
+    a.buffer_type = READ_WRITE;
+    args[2] = a;
+    buffers[2] = a;
+
 	a.data = &m_numVertices;
 	a.byte_size = sizeof(m_numVertices);
 	a.is_buffer = false;
-	args[2] = a;
+	args[3] = a;
 
     a.data = m_externalForcePos;
     a.byte_size = sizeof(m_externalForcePos);
     a.is_buffer = false;
-    args[3] = a;
+    args[4] = a;
 
     a.data = &m_externalForceStrength;
     a.byte_size = sizeof(m_externalForceStrength);
     a.is_buffer = false;
-    args[4] = a;
+    args[5] = a;
 
-	m_kernel->run(5, args, 2, buffers, m_numVertices, 1);
+	m_kernel->run(6, args, 3, buffers, m_numVertices, 1);
 
     m_externalForceStrength = 0;
 

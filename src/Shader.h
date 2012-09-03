@@ -13,7 +13,8 @@ class Shader
         Shader(const char* vert_path, const char* frag_path, const char* geom_path = NULL);
         void bind();
         void release();
-        
+        GLuint program() { return m_program; }
+
         void setUniform1f(const char* name, float value);
         void setUniform2f(const char* name, float v1, float v2);
         void setUniform3f(const char* name, float v1, float v2, float v3);

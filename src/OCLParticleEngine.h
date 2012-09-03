@@ -22,6 +22,9 @@ class OCLParticleEngine
 		void update(float multiplier);
 		void setExternalForce(float x, float y, float z, float strength);
 
+        Particle *velocityData() { return m_velocityArray; }
+        GLuint count() { return m_numVertices; }
+
 	private:
 		GLuint m_vbo;
 		GLuint m_ibo;
@@ -33,9 +36,7 @@ class OCLParticleEngine
 		OCLKernel* m_kernel;
 		Particle* m_particleArray;
 		Particle* m_velocityArray;
-		Particle* m_traceArray;
-		
-
+	    float* m_massArray;	
 };
 
 #endif
