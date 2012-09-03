@@ -23,6 +23,7 @@ class OCLParticleEngine
 		void setExternalForce(float x, float y, float z, float strength);
 
         Particle *velocityData() { return m_velocityArray; }
+        float *massData() { return m_massArray; }
         GLuint count() { return m_numVertices; }
 
 	private:
