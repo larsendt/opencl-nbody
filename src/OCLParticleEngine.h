@@ -24,9 +24,13 @@ class OCLParticleEngine
 
         Particle *velocityData() { return m_velocityArray; }
         float *massData() { return m_massArray; }
+        Particle *positionData() { return m_particleArray; }
         GLuint count() { return m_numVertices; }
 
 	private:
+        // get a normally-distributed random number
+        float normalRandom();
+
 		GLuint m_vbo;
 		GLuint m_ibo;
 		int m_numVertices;

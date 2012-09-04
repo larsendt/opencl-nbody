@@ -20,11 +20,13 @@ GLEngine::~GLEngine()
 {
 	delete m_window;
 	delete m_clock;
+    delete m_particles;
+    delete m_particleShader;
 }
 
 void GLEngine::initGL(int argc, char** argv)
 {
-	m_window = new sf::Window(sf::VideoMode(800, 600), "GLEngine");
+	m_window = new sf::Window(sf::VideoMode(1300, 700), "GLEngine");
 	m_clock = new sf::Clock();
 	m_screenWidth = m_window->GetWidth();
 	m_screenHeight = m_window->GetHeight();
@@ -132,7 +134,7 @@ void GLEngine::drawScene()
 
     // pass the velocity data into the shader for coloring
     Particle *velocities = m_particles->velocityData();
-    float *masses = m_particles->massData();
+    
     GLuint particle_count = m_particles->count();
     GLuint vertex_array;
     glGenVertexArrays(1, &vertex_array);
@@ -140,16 +142,11 @@ void GLEngine::drawScene()
 
     GLuint buffer;
     glGenBuffers(1, &buffer);
-   
-    GLuint velocity_location = glGetAttribLocation(m_particleShader->program(), "velocity");
-    glEnableVertexAttribArray(velocity_location);
-    
+
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
     glBufferData(GL_ARRAY_BUFFER, particle_count*sizeof(Particle), velocities, GL_DYNAMIC_DRAW);
-    glVertexAttribPointer(velocity_location, 3, GL_FLOAT, 0, 0, 0);
+    m_particleShader->vertexAttribPointer("velocity", 3, GL_FLOAT);
         
-    // put masses here 
-
     glBlendFunc(GL_ONE, GL_ONE);
 	glEnable(GL_BLEND);
 

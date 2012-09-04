@@ -28,7 +28,7 @@ void billboard(float x,float y,int s,int t)
 
 void main()
 {
-   float s = 0.01;
+   float s = 0.05;
 
    billboard(-s,-s , 0,0);
    billboard(+s,-s , 1,0);

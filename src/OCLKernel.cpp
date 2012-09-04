@@ -59,14 +59,15 @@ OCLKernel::OCLKernel(const char* kernel_path, const char* kernel_name, int devic
 	}
 	
 	m_kernelSource = readFile(m_kernelPath);
-	if(!m_kernelSource)
+	if(m_kernelSource == "")
 	{
 		fprintf(stderr, "Error: Failed to read kernel file %s!\n", m_kernelPath);
 		exit(EXIT_FAILURE);
 	}
 	
 	// create the m_program from the source buffer
-	m_program = clCreateProgramWithSource(m_ctx, 1, &m_kernelSource, NULL, &err);
+    const char *srcptr = m_kernelSource.c_str();
+	m_program = clCreateProgramWithSource(m_ctx, 1, &srcptr, NULL, &err);
 	if(!m_program || err != CL_SUCCESS)
 	{
 		fprintf(stderr, "Error: Failed to create program!\n");
@@ -110,7 +111,7 @@ int OCLKernel::run(int arg_count, OCLArgument* args,
 		          int buffer_count, OCLArgument* buffers,
 		          int global_width, int global_height)
 {
-	cl_mem* cl_buffers = new cl_mem[buffer_count];
+	cl_mem cl_buffers[buffer_count];
 	cl_int err;
 	
 	for(int i = 0; i < buffer_count; i++)
@@ -124,15 +125,6 @@ int OCLKernel::run(int arg_count, OCLArgument* args,
 				print_cl_err(err);
 				return EXIT_FAILURE;
 			}
-		
-			// transfer the input data to device memory
-			/*err = clEnqueueWriteBuffer(m_cmd_q, cl_buffers[i], CL_TRUE, 0, buffers[i].byte_size, buffers[i].data, 0, NULL, NULL);
-			if(err != CL_SUCCESS)
-			{
-				fprintf(stderr, "Error: Failed to enqueue buffer %d (WRITE)!\n", i);
-				print_cl_err(err);
-				return EXIT_FAILURE;
-			}*/
 		}
 		else if(buffers[i].buffer_type == READ)
 		{
@@ -153,15 +145,6 @@ int OCLKernel::run(int arg_count, OCLArgument* args,
 				print_cl_err(err);
 				return EXIT_FAILURE;
 			}
-			
-			// transfer the input data to device memory
-			/*err = clEnqueueWriteBuffer(m_cmd_q, cl_buffers[i], CL_TRUE, 0, buffers[i].byte_size, buffers[i].data, 0, NULL, NULL);
-			if(err != CL_SUCCESS)
-			{
-				fprintf(stderr, "Error: Failed to enqueue buffer %d (READ_WRITE)!\n", i);
-				print_cl_err(err);
-				return EXIT_FAILURE;
-			}*/
 		}
 	}
 	
@@ -239,7 +222,6 @@ int OCLKernel::run(int arg_count, OCLArgument* args,
 	{
 		clReleaseMemObject(cl_buffers[i]);
 	}
-	
 	
 	return EXIT_SUCCESS;
 }

@@ -20,7 +20,7 @@ kernel void nbody_move(global float* positions,
         float other_mass = masses[i];
 		float4 direction = other_vertex - this_vertex;
         float dist = length(direction);
-		total_force += normalize(direction) * (6.674e-6 / vertex_count) * (other_mass / (pow(dist, 2) + 0.001));
+		total_force += normalize(direction) * other_mass / (vertex_count * 10000.0);
 	}
 
     float4 external_force_direction = this_vertex - external_force_pos;
@@ -38,18 +38,36 @@ kernel void nbody_move(global float* positions,
 	positions[index+2] += velocities[index+2];
 
     const float bounds = 1.0;
-    if(positions[index] > bounds || positions[index] < -bounds)
+    if(positions[index] > bounds)
     {
         velocities[index] *= -0.5;
+        positions[index] = bounds; 
+    }
+    else if(positions[index] < -bounds)
+    {
+        velocities[index] *= -0.5;
+        positions[index] = -bounds;
     }
     
-    if(positions[index+1] > bounds || positions[index+1] < -bounds)
+    if(positions[index+1] > bounds)
     {
         velocities[index+1] *= -0.5;
+        positions[index+1] = bounds;
+    }
+    else if(positions[index+1] < -bounds)
+    {
+        velocities[index+1] *= -0.5;
+        positions[index+1] = -bounds;
     }
 
-    if(positions[index+2] > bounds || positions[index+2] < -bounds)
+    if(positions[index+2] > bounds)
     {
         velocities[index+2] *= -0.5;
+        positions[index+2] = bounds;
+    }
+    else if(positions[index+2] < -bounds)
+    {
+        velocities[index+2] *= -0.5;
+        positions[index+2] = -bounds;
     }
 }

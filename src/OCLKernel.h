@@ -2,6 +2,7 @@
 #define OCL_KERNEL_H
 
 #include <CL/cl.h>
+#include <string>
 
 enum BufferType {
 	READ,
@@ -29,7 +30,7 @@ class OCLKernel
 	private:
 		int m_deviceType;
 		const char* m_kernelPath;
-		const char* m_kernelSource;
+        std::string m_kernelSource;
 		const char* m_kernelName;
 		
 		cl_platform_id m_clpid;   // OpenCL platform

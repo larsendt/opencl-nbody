@@ -4,21 +4,23 @@
 
 #define INIT_SZ 4096
 
-char* readFile(const char* filename)
+std::string readFile(const char* filename)
 {
 	FILE* f = fopen(filename, "r");
-	char* text = NULL;
-	
+    std::string text;
+
 	if(f)
 	{
 		fseek(f, 0, SEEK_END);
-		long pos = ftell(f);
+		long size = ftell(f);
 		fseek(f, 0, SEEK_SET);
 		
-		text = (char*)malloc(pos * sizeof(char) + 1);
-		fread(text, pos, 1, f);
-		text[pos-1] = '\0';
-		fclose(f);		
+		char *str = new char[size+1];
+		fread(str, size, 1, f);
+	    str[size-1] = '\0';
+		fclose(f);
+        text = str;
+        delete[] str;        
 	}
     
     return text;

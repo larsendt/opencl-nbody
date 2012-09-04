@@ -8,8 +8,8 @@ DEPENDPATH += . src
 INCLUDEPATH += . /usr/local/cuda/include/
 CONFIG -= qt
 CONFIG += debug
-CFLAGS += -Wall -Wextra
-CXXFLAGS += -Wall -Wextra
+CFLAGS += -Wall -Wextra -pg
+CXXFLAGS += -Wall -Wextra -pg
 unix:LIBS += -lsfml-graphics -lsfml-audio -lsfml-window -lsfml-system -lGLU -lGL -L/usr/lib/nvidia-current -lOpenCL
 
 OBJECTS_DIR = obj

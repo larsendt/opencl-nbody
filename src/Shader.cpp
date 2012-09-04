@@ -33,6 +33,13 @@ void Shader::release()
     glUseProgram(0);
 }
 
+void Shader::vertexAttribPointer(const char *name, int size, GLenum type)
+{
+    GLint loc = glGetAttribLocation(m_program, name);
+    glEnableVertexAttribArray(loc);
+    glVertexAttribPointer(loc, 3, GL_FLOAT, 0, 0, 0);
+}
+
 void Shader::setUniform1f(const char* name, float value)
 {
     GLint loc = glGetUniformLocation(m_program, name);
@@ -128,6 +135,7 @@ void Shader::printShaderLog(GLuint shader, const char* shader_file)
         printf("Error compiling shader: %s\n%s\n", shader_file, text);
         exit(1);
     }
+    delete[] text;
 }
 
 void Shader::printProgramLog(GLuint program)
@@ -142,6 +150,7 @@ void Shader::printProgramLog(GLuint program)
         printf("Error linking program:\n%s\n", text);
         exit(1);
     }
+    delete[] text;
 }
 
 
