@@ -32,6 +32,8 @@ class GLEngine
 		Shader *m_particleShader;
 		GLuint m_texture;
         AttributeBuffer *m_velocityBuffer;
+        AttributeBuffer *m_massBuffer;
+        AttributeBuffer *m_vertexBuffer;
 		
 		float m_updateRate;
         float m_timeSpeed;
@@ -44,6 +46,8 @@ class GLEngine
         float m_mouseRotX;
         float m_mouseRotY;
         float m_scale;
+        float m_idleTime;
+        float m_rotationSpeed;
 };
 
 #endif

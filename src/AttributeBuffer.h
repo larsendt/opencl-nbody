@@ -9,6 +9,7 @@
 class AttributeBuffer {
     public:
         AttributeBuffer(GLenum usage);
+        ~AttributeBuffer();
 
         void bind(void *data, size_t size);
 

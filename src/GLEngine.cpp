@@ -6,6 +6,8 @@
 
 #include "Texture.h"
 
+#define MAX_ROTATION_SPEED 0.1
+#define IDLE_TRIGGER_TIME 100.0
 
 GLEngine::GLEngine(int argc, char** argv)
 {
@@ -22,6 +24,9 @@ GLEngine::~GLEngine()
 	delete m_clock;
     delete m_particles;
     delete m_particleShader;
+    delete m_massBuffer;
+    delete m_velocityBuffer;
+    delete m_vertexBuffer;
 }
 
 void GLEngine::initGL(int argc, char** argv)
@@ -45,11 +50,15 @@ void GLEngine::initGL(int argc, char** argv)
 	m_mouseLastX = 0;
 	m_mouseLastY = 0;
 	m_scale = 1.0;
-    m_timeSpeed = 1.0;
+    m_timeSpeed = 0.2;
+    m_rotationSpeed = 0.0;
+    m_idleTime = 0.0;
 
 	m_particleShader = new Shader("shaders/nbody.vert", "shaders/nbody.frag", "shaders/nbody.geom");
 	m_texture = Texture::loadTexture("resources/star.bmp", Texture::LINEAR);
     m_velocityBuffer = new AttributeBuffer(GL_DYNAMIC_DRAW);
+    m_massBuffer = new AttributeBuffer(GL_STATIC_DRAW);
+    m_vertexBuffer = new AttributeBuffer(GL_DYNAMIC_DRAW);
 	
 	m_updateRate = 1.0/60.0;
 	resize(m_screenWidth, m_screenHeight);
@@ -80,6 +89,8 @@ int GLEngine::begin()
 		        m_mouseRotY += dy;
 		        m_mouseLastX = Event.MouseMove.X;
 		        m_mouseLastY = Event.MouseMove.Y;
+                m_idleTime = 0.0;
+                m_rotationSpeed = 0.0;
 	        }
 	        else if(Event.Type == sf::Event::MouseWheelMoved)
 	        {
@@ -139,10 +150,18 @@ void GLEngine::drawScene()
 
     // pass the velocity data into the shader for coloring
     Particle *velocities = m_particles->velocityData();
+    Particle *vertices = m_particles->positionData();
+    float *masses = m_particles->massData();
     GLuint particle_count = m_particles->count();
 
     m_velocityBuffer->bind(velocities, particle_count*sizeof(*velocities));
     m_particleShader->vertexAttribPointer("velocity", 3, GL_FLOAT);
+
+    m_massBuffer->bind(masses, particle_count*sizeof(*masses));
+    m_particleShader->vertexAttribPointer("mass", 1, GL_FLOAT);
+
+    m_vertexBuffer->bind(vertices, particle_count*sizeof(*vertices));
+    m_particleShader->vertexAttribPointer("vertex", 3, GL_FLOAT);
         
     glBlendFunc(GL_ONE, GL_ONE);
 	glEnable(GL_BLEND);
@@ -159,7 +178,8 @@ void GLEngine::update()
 {
 	float time = m_clock->GetElapsedTime();
 	float multiplier = m_timeSpeed;
-		
+    m_idleTime += time;
+
 	if(time < m_updateRate)
 	{
 		return;
@@ -168,7 +188,17 @@ void GLEngine::update()
 	{
 		multiplier *= time / m_updateRate;
 	}
-	
+
+    if(m_idleTime > IDLE_TRIGGER_TIME)
+    {
+        m_rotationSpeed += 0.001;
+        m_mouseRotY += m_rotationSpeed;
+        if(m_rotationSpeed > MAX_ROTATION_SPEED)
+        {
+            m_rotationSpeed = MAX_ROTATION_SPEED;
+        }
+    }
+    
 	m_particles->update(multiplier);
 	m_clock->Reset();
 }

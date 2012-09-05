@@ -7,6 +7,11 @@ AttributeBuffer::AttributeBuffer(GLenum usage)
     glGenBuffers(1, &m_buffer);
 }
 
+AttributeBuffer::~AttributeBuffer()
+{
+    glDeleteBuffers(1, &m_buffer);
+}
+
 void AttributeBuffer::bind(void *data, size_t size)
 {
     glBindBuffer(GL_ARRAY_BUFFER, m_buffer);
