@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
 
 #include "Texture.h"
 
@@ -39,11 +40,11 @@ void GLEngine::initGL(int argc, char** argv)
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 	glEnable(GL_TEXTURE_2D);
 	
-    int numparticles = 1024;
+    m_particleCount = 1024;
     if(argc > 1 && atoi(argv[1]) > 0)
-        numparticles = atoi(argv[1]);
+        m_particleCount = atoi(argv[1]);
 
-	m_particles = new OCLParticleEngine(numparticles);
+	m_particles = new OCLParticleEngine(m_particleCount);
 	m_rotation = 0;
 	m_mouseRotX = 0;
 	m_mouseRotY = 0;
@@ -53,6 +54,7 @@ void GLEngine::initGL(int argc, char** argv)
     m_timeSpeed = 0.2;
     m_rotationSpeed = 0.0;
     m_idleTime = 0.0;
+    m_frameCount = 0;
 
 	m_particleShader = new Shader("shaders/nbody.vert", "shaders/nbody.frag", "shaders/nbody.geom");
 	m_texture = Texture::loadTexture("resources/star.bmp", Texture::LINEAR);
@@ -60,12 +62,14 @@ void GLEngine::initGL(int argc, char** argv)
     m_massBuffer = new AttributeBuffer(GL_STATIC_DRAW);
     m_vertexBuffer = new AttributeBuffer(GL_DYNAMIC_DRAW);
 	
-	m_updateRate = 1.0/60.0;
+	m_updateRate = 1.0/10.0;
 	resize(m_screenWidth, m_screenHeight);
+
 }
 
 int GLEngine::begin()
 {
+    m_startTime = time(NULL);
 	while(m_window->IsOpened())
 	{
 		sf::Event Event;
@@ -74,6 +78,7 @@ int GLEngine::begin()
 			if(Event.Type == sf::Event::Closed)
 			{
 				m_window->Close();
+                printStats();
 				return 0;
 			}
 			else if(Event.Type == sf::Event::MouseButtonPressed)
@@ -102,6 +107,7 @@ int GLEngine::begin()
 				{
 					case sf::Key::Escape:
 						m_window->Close();
+                        printStats();
 						return 0;
                     case sf::Key::Up:
                         m_timeSpeed += 0.05;
@@ -123,12 +129,15 @@ int GLEngine::begin()
 		drawScene();
 		m_window->Display();
 	}
+    printStats();
 	return 0;
 }
 
 
 void GLEngine::drawScene()
 {
+    m_frameCount += 1;
+
 	glClear(GL_COLOR_BUFFER_BIT);
 	glLoadIdentity();
 	
@@ -178,16 +187,16 @@ void GLEngine::update()
 {
 	float time = m_clock->GetElapsedTime();
 	float multiplier = m_timeSpeed;
+    
+    m_idleTime += time / m_updateRate;
+    multiplier *= time / m_updateRate;
 
 	if(time < m_updateRate)
 	{
 		return;
 	}
-	else if(time > m_updateRate)
-	{
-		multiplier *= time / m_updateRate;
-        m_idleTime += time / m_updateRate;
-	}
+
+    m_openCLUpdateCount += 1;
 
     if(m_idleTime > IDLE_TRIGGER_TIME)
     {
@@ -238,4 +247,28 @@ glm::vec3 GLEngine::windowCoords(int x, int y)
     gluUnProject( winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
  
     return glm::vec3(posX, posY, posZ);
+}
+
+void GLEngine::printStats()
+{
+    double t = time(NULL);
+    double elapsed = t - m_startTime;
+    double framerate = m_frameCount / elapsed;
+    double updaterate = m_openCLUpdateCount / elapsed;
+    double pixelrate = m_screenWidth * m_screenHeight * framerate;
+    printf("=============================================\n");
+    printf("OpenCL N-Body Simulator\n");
+    printf("Particle count: %d\n", m_particleCount);
+    printf("Elapsed time: %.0f seconds\n", elapsed);
+    printf("Frame count: %d frames\n", m_frameCount);
+    printf("Frame rate: %.2f frames per second\n", framerate);
+    printf("Scene update rate: %.2f updates per second\n", updaterate);
+    if(pixelrate > 1e9)
+        printf("Pixel rate: %.2f billion pixels per second\n", pixelrate/1e9);
+    else if(pixelrate > 1e6)
+        printf("Pixel rate: %.2f million pixels per second\n", pixelrate/1e6);
+    else if(pixelrate > 1e3)
+        printf("Pixel rate: %.2f thousand pixels per second\n", pixelrate/1e3);
+    else
+        printf("Pixel rate: %.2f pixels per second\n", pixelrate);
 }

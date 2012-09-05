@@ -25,6 +25,7 @@ class GLEngine
 		
 	private:
         glm::vec3 windowCoords(int x, int y); 
+        void printStats();
 
         sf::Window *m_window;
 		sf::Clock *m_clock;
@@ -40,6 +41,7 @@ class GLEngine
 		float m_aspectRatio;
 		int m_screenWidth;
 		int m_screenHeight;
+        int m_particleCount;
 		float m_rotation;
 		int m_mouseLastX;
 		int m_mouseLastY;
@@ -48,6 +50,9 @@ class GLEngine
         float m_scale;
         float m_idleTime;
         float m_rotationSpeed;
+        double m_startTime;
+        int m_frameCount;
+        int m_openCLUpdateCount;
 };
 
 #endif

@@ -34,8 +34,10 @@ class OCLParticleEngine
 		GLuint m_ibo;
 		int m_numVertices;
 		float m_time;
+        float m_multiplier;
 
-		OCLKernel* m_kernel;
+		OCLKernel* m_gravKernel;
+        OCLKernel* m_linearKernel;
 		Particle* m_particleArray;
 		Particle* m_velocityArray;
 	    float* m_massArray;	

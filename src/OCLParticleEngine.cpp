@@ -38,9 +38,9 @@ OCLParticleEngine::OCLParticleEngine(int nparticles)
 		
 		m_velocityArray[i] = p;
 
-        float base_m = 100.0;
-        m_massArray[i] = base_m * fabs(normalRandom());
-	}
+        //m_massArray[i] = pow(10, fabs(normalRandom()));
+	    m_massArray[i] = 100 * fabs(normalRandom());
+    }
 
 	glGenBuffers(1, &m_vbo); 
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
@@ -52,7 +52,8 @@ OCLParticleEngine::OCLParticleEngine(int nparticles)
 	
 	delete[] indexArray;
 	
-	m_kernel = new OCLKernel("kernels/nbody.cl", "nbody_move");
+	m_gravKernel = new OCLKernel("kernels/nbody.cl", "nbody_move");
+    m_linearKernel = new OCLKernel("kernels/linear.cl", "linear_move");
 	
 	m_time = 0.0;
 }
@@ -61,7 +62,7 @@ OCLParticleEngine::~OCLParticleEngine()
 {
 	glDeleteBuffers(1, &m_vbo);
 	glDeleteBuffers(1, &m_ibo);
-    delete m_kernel;
+    delete m_gravKernel;
     delete[] m_particleArray;
     delete[] m_massArray;
     delete[] m_velocityArray;
@@ -69,8 +70,21 @@ OCLParticleEngine::~OCLParticleEngine()
 
 void OCLParticleEngine::draw()
 {
-	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+#ifdef APPROXIMATE
+    OCLArgumentArray array;
+
+    array.appendBufferArgument(m_particleArray, m_numVertices*sizeof(*m_particleArray));
+    array.appendBufferArgument(m_velocityArray, m_numVertices*sizeof(*m_velocityArray));
+    array.appendArgument(&m_numVertices, sizeof(m_numVertices));
+    array.appendArgument(&m_multiplier, sizeof(m_multiplier));
 	
+    m_linearKernel->run(array, m_numVertices, 1);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+	glBufferSubData(GL_ARRAY_BUFFER, (GLintptr)0, m_numVertices*sizeof(Particle), m_particleArray);
+#else
+    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+#endif
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer(3, GL_FLOAT, sizeof(Particle), BUFFER_OFFSET(0));
 	
@@ -84,15 +98,17 @@ void OCLParticleEngine::draw()
 
 void OCLParticleEngine::update(float multiplier)
 {
+    m_multiplier = multiplier;
+
     OCLArgumentArray array;
 
     array.appendBufferArgument(m_particleArray, m_numVertices*sizeof(*m_particleArray));
     array.appendBufferArgument(m_velocityArray, m_numVertices*sizeof(*m_velocityArray));
     array.appendBufferArgument(m_massArray, m_numVertices*sizeof(*m_massArray));
     array.appendArgument(&m_numVertices, sizeof(m_numVertices));
-    array.appendArgument(&multiplier, sizeof(multiplier));
+    array.appendArgument(&m_multiplier, sizeof(m_multiplier));
     
-	m_kernel->run(array, m_numVertices, 1);
+	m_gravKernel->run(array, m_numVertices, 1);
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
 	glBufferSubData(GL_ARRAY_BUFFER, (GLintptr)0, m_numVertices*sizeof(Particle), m_particleArray);
