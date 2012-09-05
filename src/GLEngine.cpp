@@ -45,9 +45,11 @@ void GLEngine::initGL(int argc, char** argv)
 	m_mouseLastX = 0;
 	m_mouseLastY = 0;
 	m_scale = 1.0;
+    m_timeSpeed = 1.0;
 
 	m_particleShader = new Shader("shaders/nbody.vert", "shaders/nbody.frag", "shaders/nbody.geom");
 	m_texture = Texture::loadTexture("resources/star.bmp", Texture::LINEAR);
+    m_velocityBuffer = new AttributeBuffer(GL_DYNAMIC_DRAW);
 	
 	m_updateRate = 1.0/60.0;
 	resize(m_screenWidth, m_screenHeight);
@@ -90,6 +92,12 @@ int GLEngine::begin()
 					case sf::Key::Escape:
 						m_window->Close();
 						return 0;
+                    case sf::Key::Up:
+                        m_timeSpeed += 0.05;
+                        break;
+                    case sf::Key::Down:
+                        m_timeSpeed -= 0.05;
+                        break;
                     default:
 						break;
 				}
@@ -131,17 +139,9 @@ void GLEngine::drawScene()
 
     // pass the velocity data into the shader for coloring
     Particle *velocities = m_particles->velocityData();
-    
     GLuint particle_count = m_particles->count();
-    GLuint vertex_array;
-    glGenVertexArrays(1, &vertex_array);
-    glBindVertexArray(vertex_array);
 
-    GLuint buffer;
-    glGenBuffers(1, &buffer);
-
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, particle_count*sizeof(Particle), velocities, GL_DYNAMIC_DRAW);
+    m_velocityBuffer->bind(velocities, particle_count*sizeof(*velocities));
     m_particleShader->vertexAttribPointer("velocity", 3, GL_FLOAT);
         
     glBlendFunc(GL_ONE, GL_ONE);
@@ -158,7 +158,7 @@ void GLEngine::drawScene()
 void GLEngine::update()
 {
 	float time = m_clock->GetElapsedTime();
-	float multiplier = 1.0;
+	float multiplier = m_timeSpeed;
 		
 	if(time < m_updateRate)
 	{
@@ -166,7 +166,7 @@ void GLEngine::update()
 	}
 	else if(time > m_updateRate)
 	{
-		multiplier = time / m_updateRate;
+		multiplier *= time / m_updateRate;
 	}
 	
 	m_particles->update(multiplier);

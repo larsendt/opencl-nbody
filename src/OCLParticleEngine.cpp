@@ -25,7 +25,7 @@ OCLParticleEngine::OCLParticleEngine(int nparticles)
 		float radius = normalRandom();
 		
 		p.x = cos(theta) * sin(phi) * radius;
-		p.y = cos(phi) * radius * 0.25;
+		p.y = cos(phi) * radius * 0.15;
 		p.z = sin(theta) * sin(phi) * radius;
 		
 		m_particleArray[i] = p;
@@ -90,6 +90,7 @@ void OCLParticleEngine::update(float multiplier)
     array.appendBufferArgument(m_velocityArray, m_numVertices*sizeof(*m_velocityArray));
     array.appendBufferArgument(m_massArray, m_numVertices*sizeof(*m_massArray));
     array.appendArgument(&m_numVertices, sizeof(m_numVertices));
+    array.appendArgument(&multiplier, sizeof(multiplier));
     
 	m_kernel->run(array, m_numVertices, 1);
 
