@@ -33,7 +33,7 @@ kernel void nbody_move(global float* positions,
 	positions[index+1] += velocities[index+1] * multiplier;
 	positions[index+2] += velocities[index+2] * multiplier;
 
-    const float bounds = 5.0;
+/*    const float bounds = 5.0;
     if(positions[index] > bounds)
     {
         velocities[index] *= -0.5;
@@ -66,4 +66,5 @@ kernel void nbody_move(global float* positions,
         velocities[index+2] *= -0.5;
         positions[index+2] = -bounds;
     }
+*/
 }

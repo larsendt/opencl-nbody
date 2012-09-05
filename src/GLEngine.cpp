@@ -6,7 +6,7 @@
 
 #include "Texture.h"
 
-#define MAX_ROTATION_SPEED 0.1
+#define MAX_ROTATION_SPEED 0.05
 #define IDLE_TRIGGER_TIME 100.0
 
 GLEngine::GLEngine(int argc, char** argv)
@@ -178,7 +178,6 @@ void GLEngine::update()
 {
 	float time = m_clock->GetElapsedTime();
 	float multiplier = m_timeSpeed;
-    m_idleTime += time;
 
 	if(time < m_updateRate)
 	{
@@ -187,6 +186,7 @@ void GLEngine::update()
 	else if(time > m_updateRate)
 	{
 		multiplier *= time / m_updateRate;
+        m_idleTime += time / m_updateRate;
 	}
 
     if(m_idleTime > IDLE_TRIGGER_TIME)
@@ -214,7 +214,7 @@ void GLEngine::resize(int width, int height)
 	glViewport(0, 0, width, height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(45, m_aspectRatio, 0.05, 20.0);
+	gluPerspective(75, m_aspectRatio, 0.05, 20.0);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }
