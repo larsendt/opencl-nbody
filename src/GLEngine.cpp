@@ -90,9 +90,6 @@ int GLEngine::begin()
 					case sf::Key::Escape:
 						m_window->Close();
 						return 0;
-                    case sf::Key::Space:
-                        m_particles->setExternalForce(0.05, 0, 0, 0.0001);
-                        break;
                     default:
 						break;
 				}

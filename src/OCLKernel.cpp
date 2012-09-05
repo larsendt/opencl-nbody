@@ -107,10 +107,13 @@ OCLKernel::~OCLKernel()
 	clReleaseContext(m_ctx);
 }
 
-int OCLKernel::run(int arg_count, OCLArgument* args, 
-		          int buffer_count, OCLArgument* buffers,
-		          int global_width, int global_height)
+int OCLKernel::run(OCLArgumentArray array, int global_width, int global_height)
 {
+    int buffer_count = array.bufferArguments().size();
+    int arg_count = array.arguments().size();
+    std::vector<OCLArgument> buffers = array.bufferArguments();
+    std::vector<OCLArgument> args = array.arguments();
+
 	cl_mem cl_buffers[buffer_count];
 	cl_int err;
 	
@@ -226,7 +229,34 @@ int OCLKernel::run(int arg_count, OCLArgument* args,
 	return EXIT_SUCCESS;
 }
 
+//---------------------------------------
+// OCLArgumentArray
+//---------------------------------------
 
+OCLArgumentArray::OCLArgumentArray()
+{
+}
+
+void OCLArgumentArray::appendArgument(void *data, size_t size)
+{
+    OCLArgument a;
+    a.data = data;
+    a.byte_size = size;
+    a.is_buffer = false;
+    m_arguments.push_back(a);
+}
+
+void OCLArgumentArray::appendBufferArgument(void *data, size_t size)
+{
+    OCLArgument a;
+    a.data = data;
+    a.byte_size = size;
+    a.is_buffer = true;
+    a.buffer_index = m_bufferArguments.size();
+    a.buffer_type = READ_WRITE;
+    m_arguments.push_back(a);
+    m_bufferArguments.push_back(a);
+}
 
 
 

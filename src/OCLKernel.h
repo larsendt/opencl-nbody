@@ -3,6 +3,7 @@
 
 #include <CL/cl.h>
 #include <string>
+#include <vector>
 
 enum BufferType {
 	READ,
@@ -18,14 +19,26 @@ struct OCLArgument {
 	BufferType buffer_type;
 };
 
+class OCLArgumentArray {
+    public:
+        OCLArgumentArray();
+        void appendArgument(void *data, size_t size);
+        void appendBufferArgument(void *data, size_t size);
+        
+        const std::vector<OCLArgument>& arguments() { return m_arguments; }
+        const std::vector<OCLArgument>& bufferArguments() { return m_bufferArguments; }
+
+    private:
+        std::vector<OCLArgument> m_arguments;
+        std::vector<OCLArgument> m_bufferArguments;
+}; 
+
 class OCLKernel 
 {
 	public:
 		OCLKernel(const char* kernel_path, const char* kernel_name, int device_type = CL_DEVICE_TYPE_GPU);
 		~OCLKernel();
-		int run(int arg_count, OCLArgument* args, 
-		          int buffer_count, OCLArgument* buffers,
-		          int global_width, int global_height);
+		int run(OCLArgumentArray array, int global_width, int global_height);
 		
 	private:
 		int m_deviceType;

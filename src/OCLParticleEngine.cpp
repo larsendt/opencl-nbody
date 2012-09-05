@@ -11,12 +11,6 @@ OCLParticleEngine::OCLParticleEngine(int nparticles)
 	srand(time(NULL));
 	GLushort* indexArray;
 
-    m_externalForcePos[0] = 0;
-    m_externalForcePos[1] = 0;
-    m_externalForcePos[2] = 0;
-    m_externalForcePos[3] = 0;
-    m_externalForceStrength = 0;
-	
 	m_numVertices = nparticles;
 	m_particleArray = new Particle[m_numVertices];
 	m_velocityArray = new Particle[m_numVertices];
@@ -79,8 +73,6 @@ void OCLParticleEngine::draw()
 	
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer(3, GL_FLOAT, sizeof(Particle), BUFFER_OFFSET(0));
-	//glEnableClientState(GL_COLOR_ARRAY);
-	//glColorPointer(4, GL_FLOAT, sizeof(Particle), BUFFER_OFFSET(12));
 	
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
 	glDrawElements(GL_POINTS, m_numVertices, GL_UNSIGNED_SHORT, 0);
@@ -92,67 +84,19 @@ void OCLParticleEngine::draw()
 
 void OCLParticleEngine::update(float multiplier)
 {
-	OCLArgument args[6];
-	OCLArgument buffers[3];
-	
-	OCLArgument a;
-	a.data = m_particleArray;
-	a.byte_size = m_numVertices * sizeof(Particle);
-	a.is_buffer = true;
-	a.buffer_index = 0;
-	a.buffer_type = READ_WRITE;
-	args[0] = a;
-	buffers[0] = a;
+    OCLArgumentArray array;
 
-	a.data = m_velocityArray;
-	a.byte_size = m_numVertices * sizeof(Particle);
-	a.is_buffer = true;
-	a.buffer_index = 1;
-	a.buffer_type = READ_WRITE;
-	args[1] = a;
-	buffers[1] = a;
-
-    a.data = m_massArray;
-    a.byte_size = m_numVertices * sizeof(float);
-    a.is_buffer = true;
-    a.buffer_index = 2;
-    a.buffer_type = READ_WRITE;
-    args[2] = a;
-    buffers[2] = a;
-
-	a.data = &m_numVertices;
-	a.byte_size = sizeof(m_numVertices);
-	a.is_buffer = false;
-	args[3] = a;
-
-    a.data = m_externalForcePos;
-    a.byte_size = sizeof(m_externalForcePos);
-    a.is_buffer = false;
-    args[4] = a;
-
-    a.data = &m_externalForceStrength;
-    a.byte_size = sizeof(m_externalForceStrength);
-    a.is_buffer = false;
-    args[5] = a;
-
-	m_kernel->run(6, args, 3, buffers, m_numVertices, 1);
-
-    m_externalForceStrength = 0;
+    array.appendBufferArgument(m_particleArray, m_numVertices*sizeof(*m_particleArray));
+    array.appendBufferArgument(m_velocityArray, m_numVertices*sizeof(*m_velocityArray));
+    array.appendBufferArgument(m_massArray, m_numVertices*sizeof(*m_massArray));
+    array.appendArgument(&m_numVertices, sizeof(m_numVertices));
+    
+	m_kernel->run(array, m_numVertices, 1);
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
 	glBufferSubData(GL_ARRAY_BUFFER, (GLintptr)0, m_numVertices*sizeof(Particle), m_particleArray);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);	
 	
-}
-
-void OCLParticleEngine::setExternalForce(float x, float y, float z, float strength)
-{
-    m_externalForcePos[0] = x; 
-    m_externalForcePos[1] = y; 
-    m_externalForcePos[2] = z; 
-    m_externalForcePos[3] = 0; 
-
-    m_externalForceStrength = strength;
 }
 
 //-------------------------------

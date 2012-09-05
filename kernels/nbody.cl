@@ -1,9 +1,7 @@
 kernel void nbody_move(global float* positions, 
                        global float* velocities, 
                        global float* masses,
-                       int vertex_count, 
-                       float4 external_force_pos,
-                       float external_force_strength)
+                       int vertex_count)
 {
 	int index = get_global_id(0) * 3;
 	
@@ -23,10 +21,6 @@ kernel void nbody_move(global float* positions,
 		total_force += normalize(direction) * other_mass / (vertex_count * 10000.0);
 	}
 
-    float4 external_force_direction = this_vertex - external_force_pos;
-    float dist = length(external_force_direction);
-    total_force += normalize(external_force_direction) * external_force_strength / (pow(dist, 2) + 0.001);
-
     this_acceleration = total_force / this_mass; 
 
 	velocities[index] += this_acceleration.x;
@@ -37,7 +31,7 @@ kernel void nbody_move(global float* positions,
 	positions[index+1] += velocities[index+1];
 	positions[index+2] += velocities[index+2];
 
-    const float bounds = 1.0;
+    const float bounds = 2.0;
     if(positions[index] > bounds)
     {
         velocities[index] *= -0.5;
