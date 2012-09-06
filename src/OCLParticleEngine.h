@@ -37,7 +37,6 @@ class OCLParticleEngine
         float m_multiplier;
 
 		OCLKernel* m_gravKernel;
-        OCLKernel* m_linearKernel;
 		Particle* m_particleArray;
 		Particle* m_velocityArray;
 	    float* m_massArray;	

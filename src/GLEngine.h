@@ -35,7 +35,7 @@ class GLEngine
         AttributeBuffer *m_velocityBuffer;
         AttributeBuffer *m_massBuffer;
         AttributeBuffer *m_vertexBuffer;
-		
+        
 		float m_updateRate;
         float m_timeSpeed;
 		float m_aspectRatio;

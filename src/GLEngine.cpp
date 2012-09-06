@@ -62,7 +62,8 @@ void GLEngine::initGL(int argc, char** argv)
     m_massBuffer = new AttributeBuffer(GL_STATIC_DRAW);
     m_vertexBuffer = new AttributeBuffer(GL_DYNAMIC_DRAW);
 	
-	m_updateRate = 1.0/10.0;
+    m_updateRate = 1.0/60.0;
+
 	resize(m_screenWidth, m_screenHeight);
 
 }
@@ -109,6 +110,12 @@ int GLEngine::begin()
 						m_window->Close();
                         printStats();
 						return 0;
+                    case sf::Key::Space:
+                        printStats();
+                        m_startTime = time(NULL);
+                        m_frameCount = 0;
+                        m_openCLUpdateCount = 0;
+                        break;
                     case sf::Key::Up:
                         m_timeSpeed += 0.05;
                         break;

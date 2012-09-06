@@ -53,7 +53,7 @@ OCLParticleEngine::OCLParticleEngine(int nparticles)
 	delete[] indexArray;
 	
 	m_gravKernel = new OCLKernel("kernels/nbody.cl", "nbody_move");
-    m_linearKernel = new OCLKernel("kernels/linear.cl", "linear_move");
+    //m_linearKernel = new OCLKernel("kernels/linear.cl", "linear_move");
 	
 	m_time = 0.0;
 }
@@ -70,21 +70,25 @@ OCLParticleEngine::~OCLParticleEngine()
 
 void OCLParticleEngine::draw()
 {
-#ifdef APPROXIMATE
-    OCLArgumentArray array;
+    /*if(m_approximate)
+    {
+        OCLArgumentArray array;
 
-    array.appendBufferArgument(m_particleArray, m_numVertices*sizeof(*m_particleArray));
-    array.appendBufferArgument(m_velocityArray, m_numVertices*sizeof(*m_velocityArray));
-    array.appendArgument(&m_numVertices, sizeof(m_numVertices));
-    array.appendArgument(&m_multiplier, sizeof(m_multiplier));
+        array.appendBufferArgument(m_particleArray, m_numVertices*sizeof(*m_particleArray));
+        array.appendBufferArgument(m_velocityArray, m_numVertices*sizeof(*m_velocityArray));
+        array.appendArgument(&m_numVertices, sizeof(m_numVertices));
+        array.appendArgument(&m_multiplier, sizeof(m_multiplier));
 	
-    m_linearKernel->run(array, m_numVertices, 1);
+        m_linearKernel->run(array, m_numVertices, 1);
 
-	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-	glBufferSubData(GL_ARRAY_BUFFER, (GLintptr)0, m_numVertices*sizeof(Particle), m_particleArray);
-#else
+	    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+	    glBufferSubData(GL_ARRAY_BUFFER, (GLintptr)0, m_numVertices*sizeof(Particle), m_particleArray);
+    }
+    else
+    {*/
     glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-#endif
+    //}
+
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer(3, GL_FLOAT, sizeof(Particle), BUFFER_OFFSET(0));
 	
