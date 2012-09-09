@@ -6,9 +6,10 @@
 #include <time.h>
 
 #include "Texture.h"
+#include "OptParser.h"
 
 #define MAX_ROTATION_SPEED 0.05
-#define IDLE_TRIGGER_TIME 5
+#define IDLE_TRIGGER_TIME 3
 
 GLEngine::GLEngine(int argc, char** argv)
 {
@@ -32,17 +33,79 @@ GLEngine::~GLEngine()
 
 void GLEngine::initGL(int argc, char** argv)
 {
-	m_window = new sf::Window(sf::VideoMode(1300, 700), "GLEngine");
+    OptParser opt;
+    opt.addOption("-p", "--particles", "particle count in the simulation", "COUNT");
+    opt.addOption("-x", "--width", "screen width", "PIXELS");
+    opt.addOption("-y", "--height", "screen height", "PIXELS");
+    opt.addOption("-h", "--help", "print this help");
+
+    if(!opt.parse(argc, argv, 1))
+    {
+        printf("%s\n", opt.errorString().c_str());
+        printUsage();
+        exit(1);
+    }
+
+    if(opt.hasOption("-h"))
+    {
+        printHelp(opt.helpString());
+        exit(0);
+    }
+
+    
+    if(opt.hasOption("-p"))
+    {
+        int v = atoi(opt.getValue("-p").c_str());
+        if(v > 0)
+            m_particleCount = v;
+        else
+        {
+            printf("Particle count (-p) must be greater than 0\n");
+            exit(1);
+        }
+    }
+    else
+    {
+        m_particleCount = 1024;
+    }
+
+    if(opt.hasOption("-x"))
+    {
+        int x = atoi(opt.getValue("-x").c_str());
+        if(x > 0)
+            m_screenWidth = x;
+        else
+        {
+            printf("Screen width (-x) must be greater than 0\n");
+            exit(1);
+        }
+    }   
+    else
+    {
+        m_screenWidth = 800;
+    }
+
+    if(opt.hasOption("-y"))
+    {
+        int y = atoi(opt.getValue("-y").c_str());
+        if(y > 0)
+            m_screenHeight = y;
+        else
+        {
+            printf("Screen height (-y) must be greater than 0\n");
+            exit(1);
+        }
+    }
+    else
+    {
+        m_screenHeight = 600;
+    }
+
+	m_window = new sf::Window(sf::VideoMode(m_screenWidth, m_screenHeight), "GLEngine");
 	m_clock = new sf::Clock();
-	m_screenWidth = m_window->GetWidth();
-	m_screenHeight = m_window->GetHeight();
 	
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 	glEnable(GL_TEXTURE_2D);
-	
-    m_particleCount = 1024;
-    if(argc > 1 && atoi(argv[1]) > 0)
-        m_particleCount = atoi(argv[1]);
 
 	m_particles = new OCLParticleEngine(m_particleCount);
 	m_rotation = 0;
@@ -51,7 +114,7 @@ void GLEngine::initGL(int argc, char** argv)
 	m_mouseLastX = 0;
 	m_mouseLastY = 0;
 	m_scale = 1.0;
-    m_timeSpeed = 0.0;
+    m_timeSpeed = 0.2;
     m_rotationSpeed = 0.0;
     m_lastActiveTime = time(NULL);
     m_frameCount = 0;
@@ -277,4 +340,17 @@ void GLEngine::printStats()
         printf("Pixel rate: %.2f thousand pixels per second\n", pixelrate/1e3);
     else
         printf("Pixel rate: %.2f pixels per second\n", pixelrate);
+}
+
+void GLEngine::printUsage()
+{
+    printf("Usage: ./opencl-nbody [-pxy]\n");
+    printf("Run with --help for more info\n");
+}
+
+void GLEngine::printHelp(std::string help_str)
+{
+    printf("Usage: ./opencl-nbody [OPTIONS]\n");
+    printf("OPTIONS:\n");
+    printf("%s\n", help_str.c_str());
 }

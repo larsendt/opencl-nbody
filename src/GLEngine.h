@@ -26,6 +26,8 @@ class GLEngine
 	private:
         glm::vec3 windowCoords(int x, int y); 
         void printStats();
+        void printUsage();
+        void printHelp(std::string help_str);
 
         sf::Window *m_window;
 		sf::Clock *m_clock;
