@@ -48,7 +48,7 @@ class GLEngine
         float m_mouseRotX;
         float m_mouseRotY;
         float m_scale;
-        float m_idleTime;
+        int m_lastActiveTime;
         float m_rotationSpeed;
         double m_startTime;
         int m_frameCount;

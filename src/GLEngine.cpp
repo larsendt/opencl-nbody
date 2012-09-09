@@ -8,7 +8,7 @@
 #include "Texture.h"
 
 #define MAX_ROTATION_SPEED 0.05
-#define IDLE_TRIGGER_TIME 100.0
+#define IDLE_TRIGGER_TIME 5
 
 GLEngine::GLEngine(int argc, char** argv)
 {
@@ -51,9 +51,9 @@ void GLEngine::initGL(int argc, char** argv)
 	m_mouseLastX = 0;
 	m_mouseLastY = 0;
 	m_scale = 1.0;
-    m_timeSpeed = 0.2;
+    m_timeSpeed = 0.0;
     m_rotationSpeed = 0.0;
-    m_idleTime = 0.0;
+    m_lastActiveTime = time(NULL);
     m_frameCount = 0;
 
 	m_particleShader = new Shader("shaders/nbody.vert", "shaders/nbody.frag", "shaders/nbody.geom");
@@ -95,7 +95,7 @@ int GLEngine::begin()
 		        m_mouseRotY += dy;
 		        m_mouseLastX = Event.MouseMove.X;
 		        m_mouseLastY = Event.MouseMove.Y;
-                m_idleTime = 0.0;
+                m_lastActiveTime = time(NULL);
                 m_rotationSpeed = 0.0;
 	        }
 	        else if(Event.Type == sf::Event::MouseWheelMoved)
@@ -192,20 +192,19 @@ void GLEngine::drawScene()
 
 void GLEngine::update()
 {
-	float time = m_clock->GetElapsedTime();
+	float elapsed_time = m_clock->GetElapsedTime();
 	float multiplier = m_timeSpeed;
     
-    m_idleTime += time / m_updateRate;
-    multiplier *= time / m_updateRate;
+    multiplier *= elapsed_time / m_updateRate;
 
-	if(time < m_updateRate)
+	if(elapsed_time < m_updateRate)
 	{
 		return;
 	}
 
     m_openCLUpdateCount += 1;
 
-    if(m_idleTime > IDLE_TRIGGER_TIME)
+    if((time(NULL) - m_lastActiveTime) > IDLE_TRIGGER_TIME)
     {
         m_rotationSpeed += 0.001;
         m_mouseRotY += m_rotationSpeed;
