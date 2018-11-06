@@ -11,6 +11,7 @@
 #define GLM_SWIZZLE
 #include "glm/glm.hpp"
 
+#include <GL/glu.h>
 class GLEngine
 {
 	public:

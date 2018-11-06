@@ -134,70 +134,70 @@ void GLEngine::initGL(int argc, char** argv)
 int GLEngine::begin()
 {
     m_startTime = time(NULL);
-	while(m_window->IsOpened())
+	while(m_window->isOpen())
 	{
 		sf::Event Event;
-		while(m_window->GetEvent(Event))
+		while(m_window->pollEvent(Event))
 		{
-			if(Event.Type == sf::Event::Closed)
+			if(Event.type == sf::Event::Closed)
 			{
-				m_window->Close();
+				m_window->close();
                 printStats();
 				return 0;
 			}
-			else if(Event.Type == sf::Event::MouseButtonPressed)
+			else if(Event.type == sf::Event::MouseButtonPressed)
 			{
-			    m_mouseLastX = Event.MouseButton.X;
-			    m_mouseLastY = Event.MouseButton.Y;
+			    m_mouseLastX = Event.mouseButton.x;
+			    m_mouseLastY = Event.mouseButton.y;
 		    }
-		    else if(Event.Type == sf::Event::MouseMoved && m_window->GetInput().IsMouseButtonDown(sf::Mouse::Left))
+		    else if(Event.type == sf::Event::MouseMoved) // && m_window->GetInput().IsMouseButtonDown(sf::Mouse::Left))
 		    {
-		        int dx = Event.MouseMove.Y - m_mouseLastY; 
-		        int dy = Event.MouseMove.X - m_mouseLastX;
+		        int dx = Event.mouseMove.y - m_mouseLastY; 
+		        int dy = Event.mouseMove.x - m_mouseLastX;
 		        m_mouseRotX += dx;
 		        m_mouseRotY += dy;
-		        m_mouseLastX = Event.MouseMove.X;
-		        m_mouseLastY = Event.MouseMove.Y;
+		        m_mouseLastX = Event.mouseMove.x;
+		        m_mouseLastY = Event.mouseMove.y;
                 m_lastActiveTime = time(NULL);
                 m_rotationSpeed = 0.0;
 	        }
-	        else if(Event.Type == sf::Event::MouseWheelMoved)
+	        else if(Event.type == sf::Event::MouseWheelMoved)
 	        {
-	            m_scale += (float)Event.MouseWheel.Delta / 10.0;
+	            m_scale += (float)Event.mouseWheel.delta / 10.0;
             }
-			else if(Event.Type == sf::Event::KeyPressed)
+			else if(Event.type == sf::Event::KeyPressed)
 			{
-				switch(Event.Key.Code)
+				switch(Event.key.code)
 				{
-					case sf::Key::Escape:
-						m_window->Close();
+					case sf::Keyboard::Escape:
+						m_window->close();
                         printStats();
 						return 0;
-                    case sf::Key::Space:
+                    case sf::Keyboard::Space:
                         printStats();
                         m_startTime = time(NULL);
                         m_frameCount = 0;
                         m_openCLUpdateCount = 0;
                         break;
-                    case sf::Key::Up:
+                    case sf::Keyboard::Up:
                         m_timeSpeed += 0.05;
                         break;
-                    case sf::Key::Down:
+                    case sf::Keyboard::Down:
                         m_timeSpeed -= 0.05;
                         break;
                     default:
 						break;
 				}
 			}
-			else if(Event.Type == sf::Event::Resized)
+			else if(Event.type == sf::Event::Resized)
 			{
-				resize(Event.Size.Width, Event.Size.Height);
+				resize(Event.size.width, Event.size.height);
 			}
 		}
 		
 		update();
 		drawScene();
-		m_window->Display();
+		m_window->display();
 	}
     printStats();
 	return 0;
@@ -255,7 +255,8 @@ void GLEngine::drawScene()
 
 void GLEngine::update()
 {
-	float elapsed_time = m_clock->GetElapsedTime();
+	sf::Time temp_time = m_clock->getElapsedTime();
+	float elapsed_time = temp_time.asSeconds();
 	float multiplier = m_timeSpeed;
     
     multiplier *= elapsed_time / m_updateRate;
@@ -278,7 +279,7 @@ void GLEngine::update()
     }
     
 	m_particles->update(multiplier);
-	m_clock->Reset();
+	m_clock->restart();
 }
 
 
