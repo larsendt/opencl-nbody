@@ -19,10 +19,10 @@ GLuint Texture::loadTexture(std::string img_path, ScalingMode mode)
 	}
 
     sf::Image* img = new sf::Image();
-    if(!img->LoadFromFile(img_path))
+    if(!img->loadFromFile(img_path))
     {
         printf("Failed to load texture: %s Using default color #ff00ff\n", img_path.c_str());
-		img->Create(50, 50, sf::Color::Magenta);	
+		img->create(50, 50, sf::Color::Magenta);	
     }
 
     GLint glmode;
@@ -39,7 +39,7 @@ GLuint Texture::loadTexture(std::string img_path, ScalingMode mode)
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glmode);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glmode);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img->GetWidth(), img->GetHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, img->GetPixelsPtr());
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img->getSize().x, img->getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE, img->getPixelsPtr());
     glBindTexture(GL_TEXTURE_2D, 0);
     
 	delete img;    

@@ -4,7 +4,7 @@
 #include <SFML/Graphics.hpp>
 #include <map>
 #include <string>
-
+#include <GL/glu.h>
 class Texture
 {
     public:
